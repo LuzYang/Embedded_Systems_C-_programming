@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Sensor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+
+        h1 {
+            color: #222;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 25px 35px;
+            border-radius: 15px;
+            width: 320px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .value {
+            font-size: 40px;
+            margin: 12px 0;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Arduino Sensor Dashboard</h1>
+
+    <div class="card">
+        <div class="label">Temperature</div>
+        <div id="temp" class="value">-- °C</div>
+
+        <div class="label">Humidity</div>
+        <div id="hum" class="value">-- %</div>
+
+        <div id="status" class="status">Waiting for data...</div>
+    </div>
+
+    <script>
+    async function fetchData() {
+        try {
+            const res = await fetch("http://172.20.10.5:8080/latest", {
+                cache: "no-store"
+            });
+
+            const data = await res.json();
+
+            if (!data.temperature || !data.humidity) {
+                document.getElementById("status").innerText = "No data yet...";
+                return;
+            }
+
+            document.getElementById("temp").innerText = data.temperature + " °C";
+            document.getElementById("hum").innerText = data.humidity + " %";
+            document.getElementById("status").innerText = "Updated at " + new Date().toLocaleTimeString();
+
+        } catch (err) {
+            document.getElementById("status").innerText = "Error connecting to server";
+        }
+    }
+
+    setInterval(fetchData, 2000);
+    fetchData();
+    </script>
+
+</body>
+</html>
